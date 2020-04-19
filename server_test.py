@@ -131,7 +131,7 @@ parser.add_argument('--bl-predict-net', type=int, nargs='+',
                     help='baseline predict net hidden layer sizes')
 parser.add_argument('--non-linearity', type=str,
                     help='non linearity to use throughout')
-parser.add_argument('--viz', action='store_true', default=True,
+parser.add_argument('--viz', action='store_true', default=False,
                     help='generate vizualizations during optimization')
 parser.add_argument('--viz-every', type=int, default=2,
                     help='number of steps between vizualizations')
@@ -143,7 +143,7 @@ parser.add_argument('--save', type=str,
                     help='save parameters to specified file')
 parser.add_argument('--save-every', type=int, default=1e4,
                     help='number of steps between parameter saves')
-parser.add_argument('--cuda', action='store_true', default=False,
+parser.add_argument('--cuda', action='store_true', default=True,
                     help='use cuda')
 parser.add_argument('--jit', action='store_true', default=False,
                     help='use PyTorch jit')
@@ -220,7 +220,7 @@ def z_pres_prior_p(opt_step, time_step):
 def load_data():
 #     inpath = './air/.data'
 #     X_np, Y = multi_mnist.load(inpath)
-    X_np = np.load('/Users/chamathabeysinghe/Projects/monash/test/variational_auto_encoder/data/ANTS2/masks_400x400.npy')
+    X_np = np.load('/home/cabe0006/variational_auto_encoder/data/ANTS2/masks_400x400.npy')
     X_np = X_np.astype(np.float32)
     X_np /= 255.0
     X = torch.from_numpy(X_np)
