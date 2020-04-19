@@ -102,6 +102,13 @@ def exp_decay(initial, final, begin, duration, t):
     return max(min(x, initial), final)
 
 
+print('*********************************************************')
+print('*********************************************************')
+print('*********************************************************')
+print('*********************************************************')
+print('*********************************************************')
+print('*********************************************************')
+print('Parser 1')
 parser = argparse.ArgumentParser(description="Pyro AIR example", argument_default=argparse.SUPPRESS)
 parser.add_argument('-n', '--num-steps', type=int, default=int(1e8),
                     help='number of optimization steps to take')
@@ -190,13 +197,15 @@ parser.add_argument('-v', '--verbose', action='store_true', default=False,
 # vars(parser.parse_args(""))
 args = argparse.Namespace(**vars(parser.parse_args("")))
 
-
+print('2')
 if 'save' in args:
     if os.path.exists(args.save):
         raise RuntimeError('Output file "{}" already exists.'.format(args.save))
+print('3')
 
 if args.seed is not None:
     pyro.set_rng_seed(args.seed)
+print('4')
 
 # Build a function to compute z_pres prior probabilities.
 if args.z_pres_prior_raw:
@@ -204,6 +213,7 @@ if args.z_pres_prior_raw:
         return args.z_pres_prior
 else:
     base_z_pres_prior_p = make_prior(args.z_pres_prior)
+print('5')
 
 # Wrap with logic to apply any annealing.
 def z_pres_prior_p(opt_step, time_step):
@@ -216,6 +226,7 @@ def z_pres_prior_p(opt_step, time_step):
                      args.anneal_prior_duration, opt_step)
 
 
+print('6')
 
 def load_data():
 #     inpath = './air/.data'
@@ -229,13 +240,18 @@ def load_data():
     counts = torch.FloatTensor([1 for objs in X_np])
     return X, counts
 
+print('7')
 
 
 X, true_counts = load_data()
+print('8')
+
 X_size = X.size(0)
+print('X Size: {}'.format(X_size))
+print('9')
 if args.cuda:
     X = X.cuda()
-
+print('10')
 model_arg_keys = ['window_size',
                   'rnn_hidden_size',
                   'decoder_output_bias',
@@ -251,8 +267,9 @@ model_arg_keys = ['window_size',
                   'pos_prior_sd',
                   'scale_prior_mean',
                   'scale_prior_sd']
+print('11')
 model_args = {key: getattr(args, key) for key in model_arg_keys if key in args}
-
+print('12')
 
 air = AIR(
         num_steps=args.model_steps,
@@ -263,37 +280,44 @@ air = AIR(
         use_cuda=args.cuda,
         **model_args
     )
-
+print('13')
 if 'load' in args:
     print('Loading parameters...')
     air.load_state_dict(torch.load(args.load))
 
+print('14')
 
 if args.viz:
     vis = visdom.Visdom(env=args.visdom_env)
     z, x = air.prior(5, z_pres_prior_p=partial(z_pres_prior_p, 0))
     vis.images(draw_many(x, tensor_to_objs(latents_to_tensor(z))))
 
+print('15')
 
 def isBaselineParam(module_name, param_name):
     return 'bl_' in module_name or 'bl_' in param_name
 
+print('16')
 
 def per_param_optim_args(module_name, param_name):
     lr = args.baseline_learning_rate if isBaselineParam(module_name, param_name) else args.learning_rate
     return {'lr': lr}
 
+print('17')
 
 adam = optim.Adam(per_param_optim_args)
 elbo = JitTraceGraph_ELBO() if args.jit else TraceGraph_ELBO()
 svi = SVI(air.model, air.guide, adam, loss=elbo)
 
+print('18')
 
 t0 = time.time()
 examples_to_viz = X[5:10]
+print('19')
+print('Epochs starting')
 
 for i in range(1, args.num_steps + 1):
-
+    print("Epoch: {}".format(i))
     loss = svi.step(X, batch_size=args.batch_size, z_pres_prior_p=partial(z_pres_prior_p, i))
 
     if args.progress_every > 0 and i % args.progress_every == 0:
